@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": ".NET Core Launch (console)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/SimpleReactionMachineConsoleApp/bin/Debug/net8.0/SimpleReactionMachineConsoleApp.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/SimpleReactionMachineConsoleApp",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": ".NET Core Attach",
+            "type": "coreclr",
+            "request": "attach"
+        }
+    ]
+}
