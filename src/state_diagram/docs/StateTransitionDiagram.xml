@@ -1,0 +1,66 @@
+<mxfile host="app.diagrams.net" modified="2026-05-03T01:45:00.000Z" agent="5.0 (Windows)" version="20.1.3" editor="diagramly">
+  <diagram id="state-diagram" name="State Diagram">
+    <mxGraphModel dx="1420" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Entry Point -->
+        <mxCell id="entry" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="80" y="140" width="20" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- WaitingForCoin -->
+        <mxCell id="WaitingForCoin" value="WaitingForCoin" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="120" y="100" width="240" height="140" as="geometry"/>
+        </mxCell>
+
+        <!-- WaitingForGo -->
+        <mxCell id="WaitingForGo" value="WaitingForGo" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="420" y="100" width="240" height="140" as="geometry"/>
+        </mxCell>
+
+        <!-- WaitingForRelease -->
+        <mxCell id="WaitingForRelease" value="WaitingForRelease" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="720" y="100" width="260" height="140" as="geometry"/>
+        </mxCell>
+
+        <!-- Timing -->
+        <mxCell id="Timing" value="Timing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="420" y="320" width="240" height="140" as="geometry"/>
+        </mxCell>
+
+        <!-- DisplayingReactionTime -->
+        <mxCell id="DisplayingReactionTime" value="DisplayingReactionTime" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="720" y="320" width="260" height="140" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrows -->
+        <mxCell id="arrow1" value="CoinInserted()" style="endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="entry" target="WaitingForCoin">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="arrow2" value="CoinInserted()" style="endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="WaitingForCoin" target="WaitingForGo">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="arrow3" value="GoStopPressed() / Wait..." style="endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="WaitingForGo" target="WaitingForRelease">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="arrow4" value="Tick() / Delay Expired" style="endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="WaitingForRelease" target="Timing">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="arrow5" value="GoStopPressed() / Record Time" style="endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="Timing" target="DisplayingReactionTime">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="arrow6" value="Tick() / 3s → Insert coin" style="endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="DisplayingReactionTime" target="WaitingForCoin">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
