@@ -2,52 +2,37 @@ using System;
 
 namespace TheAccountClass
 {
-    public class TransferTransaction
+    public class TransferTransaction : Transaction
     {
         private Account _fromAccount;
         private Account _toAccount;
-        private decimal _amount;
         private DepositTransaction _deposit;
         private WithdrawTransaction _withdraw;
-        private bool _executed;
-        private bool _reversed;
 
-        public TransferTransaction(Account fromAccount, Account toAccount, decimal amount)
+        public TransferTransaction(Account fromAccount, Account toAccount, decimal amount) : base(amount)
         {
             _fromAccount = fromAccount;
             _toAccount = toAccount;
-            _amount = amount;
             _withdraw = new WithdrawTransaction(fromAccount, amount);
             _deposit = new DepositTransaction(toAccount, amount);
-            _executed = false;
-            _reversed = false;
+            // _executed and _reversed are handled by base class
         }
 
-        public bool Executed
+        public override bool Success
         {
-            get { return _executed; }
+            get
+            {
+                // Success is true only if the transfer has been executed, not reversed,
+                // and both withdraw and deposit legs succeeded.
+                return _executed && !_reversed && _withdraw.Success && _deposit.Success;
+            }
         }
 
-        public bool Success
+        public override void Print()
         {
-            // Success is true only if both withdraw and deposit transactions succeeded
-            get { return _withdraw.Success && _deposit.Success; }
-        }
-
-        public bool Reversed
-        {
-            get { return _reversed; }
-        }
-
-        public void Print()
-        {
-            Console.WriteLine("Transfer Transaction Details:");
+            base.Print(); // Call base Print to show common transaction details
             Console.WriteLine($"From Account: {_fromAccount.Name}");
             Console.WriteLine($"To Account: {_toAccount.Name}");
-            Console.WriteLine($"Amount: {_amount:C}");
-            Console.WriteLine($"Executed: {Executed}");
-            Console.WriteLine($"Success: {Success}");
-            Console.WriteLine($"Reversed: {Reversed}");
 
             if (Executed)
             {
@@ -73,7 +58,7 @@ namespace TheAccountClass
             _deposit.Print();
         }
 
-        public void Execute()
+        public override void Execute()
         {
             if (_executed)
             {
@@ -81,6 +66,7 @@ namespace TheAccountClass
             }
 
             _executed = true;
+            _dateStamp = DateTime.Now;
 
             try
             {
@@ -106,7 +92,7 @@ namespace TheAccountClass
             }
         }
 
-        public void Rollback()
+        public override void Rollback()
         {
             if (!_executed)
             {
@@ -120,6 +106,8 @@ namespace TheAccountClass
             {
                 throw new InvalidOperationException("Cannot rollback a failed transfer transaction.");
             }
+
+            _dateStamp = DateTime.Now; // Update datestamp on rollback
 
             try
             {

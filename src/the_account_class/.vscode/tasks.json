@@ -18,10 +18,13 @@
 			"type": "process",
 			"args": [
 				"build",
-				"${workspaceFolder}/TheAccountClass.slnx",
+				"TheAccountClass.slnx",
 				"/property:GenerateFullPaths=true",
 				"/consoleloggerparameters:NoSummary"
 			],
+			"options": {
+				"cwd": "${workspaceFolder}/src/"
+			},
 			"problemMatcher": "$msCompile"
 		}
 	]
