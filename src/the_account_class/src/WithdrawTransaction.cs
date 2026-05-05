@@ -2,35 +2,19 @@ using System;
 
 namespace TheAccountClass
 {
-    public class WithdrawTransaction
+    public class WithdrawTransaction : Transaction
     {
         private Account _account;      // Account the money will be withdrawn from
-        private decimal _amount;       // Amount to withdraw
-        private bool _executed;        // True once Execute() has been called
-        private bool _success;         // True if withdrawal succeeded
-        private bool _reversed;        // True if rollback was performed
 
-        public WithdrawTransaction(Account account, decimal amount)
+        public WithdrawTransaction(Account account, decimal amount) : base(amount)
         {
             _account = account;
-            _amount = amount;
-            _executed = false;
-            _success = false;
-            _reversed = false;
         }
 
-        public bool Executed => _executed;   // Has the transaction been attempted?
-        public bool Success => _success;    // Did the withdrawal succeed?
-        public bool Reversed => _reversed;   // Has the transaction been rolled back?
-
-        public void Print()
+        public override void Print()
         {
-            Console.WriteLine("Withdrawal Transaction Details:");
+            base.Print(); // Call base Print to show common transaction details
             Console.WriteLine($"Account Name: {_account.Name}");
-            Console.WriteLine($"Amount: {_amount:C}");
-            Console.WriteLine($"Executed: {Executed}");
-            Console.WriteLine($"Success: {Success}");
-            Console.WriteLine($"Reversed: {Reversed}");
 
             // Human‑readable status messages
             if (Executed)
@@ -45,13 +29,14 @@ namespace TheAccountClass
                 Console.WriteLine("Status: Transaction successfully reversed.");
         }
 
-        public void Execute()
+        public override void Execute()
         {
             // Prevent executing the same transaction twice
             if (_executed)
                 throw new InvalidOperationException("Transaction has already been attempted.");
 
             _executed = true;
+            _dateStamp = DateTime.Now;
 
             // Attempt the withdrawal on the account
             if (_account.Withdraw(_amount))
@@ -66,7 +51,7 @@ namespace TheAccountClass
             }
         }
 
-        public void Rollback()
+        public override void Rollback()
         {
             // Cannot rollback before execution
             if (!_executed)
@@ -79,6 +64,8 @@ namespace TheAccountClass
             // Only successful withdrawals can be rolled back
             if (!_success)
                 throw new InvalidOperationException("Cannot rollback a failed transaction.");
+
+            _dateStamp = DateTime.Now; // Update datestamp on rollback
 
             // Reverse the withdrawal by depositing the same amount
             if (_account.Deposit(_amount))

@@ -2,24 +2,21 @@ using System;
 
 namespace TheAccountClass
 {
-    /// Enumerates the menu options available for the banking system.
-    /// Values map to indices (Withdraw=1, Deposit=2, Print=3, Transfer=4, AddAccount=5, Exit=6)
-    /// to align with user choice (1-6).
-    public enum MenuOption
+    public enum MenuOption // Enumerates the menu options available for the banking system.
     {
         Withdraw,
         Deposit,
         Print,
         Transfer,
         AddAccount,
+        PrintTransactionHistory,
+        RollbackTransaction,
         Exit
     }
 
-    // Handles user interaction and interacts with the Account class.
-    public class BankSystem
+    public class BankSystem // Handles user interaction and orchestrates banking operations.
     {
-        // Initializes an account and runs the main menu loop.
-        public static void Main(string[] args)
+        public static void Main(string[] args) // Initializes bank accounts and runs the main menu loop for user interaction.
         {
             Bank bank = new Bank();
             bank.AddAccount(new Account("Jake's Account", 200000.00m));
@@ -47,6 +44,12 @@ namespace TheAccountClass
                     case MenuOption.AddAccount:
                         DoAddAccount(bank);
                         break;
+                    case MenuOption.PrintTransactionHistory:
+                        DoPrintTransactionHistory(bank);
+                        break;
+                    case MenuOption.RollbackTransaction:
+                        DoRollbackTransaction(bank);
+                        break;
                     case MenuOption.Exit:
                         Console.WriteLine("Exiting application. Goodbye!");
                         break;
@@ -54,10 +57,7 @@ namespace TheAccountClass
             } while (option != MenuOption.Exit);
         }
 
-        // Displays the menu and reads the user's choice.
-        // Continues to prompt until a valid selection (1-6) is made.
-        // returns The MenuOption selected by the user.
-        private static MenuOption ReadUserOption()
+        private static MenuOption ReadUserOption() // Displays the menu and reads the user's choice, ensuring a valid selection.
         {
             int optionInt = 0;
             bool isValid = false;
@@ -70,8 +70,10 @@ namespace TheAccountClass
                 Console.WriteLine("3. Print Account Details");
                 Console.WriteLine("4. Transfer");
                 Console.WriteLine("5. Add new account");
-                Console.WriteLine("6. Exit");
-                Console.Write("Select an option (1-6): ");
+                Console.WriteLine("6. Print Transaction History");
+                Console.WriteLine("7. Rollback Transaction");
+                Console.WriteLine("8. Exit");
+                Console.Write("Select an option (1-8): ");
 
                 try
                 {
@@ -79,13 +81,13 @@ namespace TheAccountClass
                     optionInt = Convert.ToInt32(input);
 
                     // Validate choice is within range
-                    if (optionInt >= 1 && optionInt <= 6) // Updated validation range
+                    if (optionInt >= 1 && optionInt <= 8) // Updated validation range
                     {
                         isValid = true;
                     }
                     else
                     {
-                        Console.WriteLine("Error: Please select a valid option (1-5).");
+                        Console.WriteLine("Error: Please select a valid option (1-8).");
                     }
                 }
                 catch
@@ -99,8 +101,7 @@ namespace TheAccountClass
             return (MenuOption)(optionInt - 1);
         }
 
-        // Handles the deposit process by prompting for an amount and calling Account.Deposit.
-        private static void DoDeposit(Bank bank)
+        private static void DoDeposit(Bank bank) // Handles the deposit process, prompting the user for an amount and account.
         {
             Account? account = FindAccount(bank);
             if (account == null)
@@ -114,7 +115,14 @@ namespace TheAccountClass
                 decimal amount = Convert.ToDecimal(Console.ReadLine());
                 DepositTransaction transaction = new DepositTransaction(account, amount);
                 bank.ExecuteTransaction(transaction); // Use the bank's execute transaction
-                transaction.Print();
+                if (transaction.Success)
+                {
+                    Console.WriteLine("Deposit successful.");
+                }
+                else
+                {
+                    Console.WriteLine("Deposit failed.");
+                }
             }
             catch (InvalidOperationException ex)
             {
@@ -126,8 +134,7 @@ namespace TheAccountClass
             }
         }
 
-        // Handles the withdrawal process by prompting for an amount and calling Account.Withdraw.
-        private static void DoWithdraw(Bank bank)
+        private static void DoWithdraw(Bank bank) // Handles the withdrawal process, prompting the user for an amount and account.
         {
             Account? account = FindAccount(bank);
             if (account == null)
@@ -141,7 +148,14 @@ namespace TheAccountClass
                 decimal amount = Convert.ToDecimal(Console.ReadLine());
                 WithdrawTransaction transaction = new WithdrawTransaction(account, amount);
                 bank.ExecuteTransaction(transaction); // Use the bank's execute transaction
-                transaction.Print();
+                if (transaction.Success)
+                {
+                    Console.WriteLine("Withdrawal successful.");
+                }
+                else
+                {
+                    Console.WriteLine("Withdrawal failed.");
+                }
             }
             catch (InvalidOperationException ex)
             {
@@ -153,8 +167,7 @@ namespace TheAccountClass
             }
         }
 
-        // Handles the transfer process by prompting for amounts and accounts.
-        private static void DoTransfer(Bank bank)
+        private static void DoTransfer(Bank bank) // Handles the transfer process, prompting for source, destination accounts, and amount.
         {
             Console.WriteLine("--- Transfer From ---");
             Account? fromAccount = FindAccount(bank);
@@ -182,7 +195,14 @@ namespace TheAccountClass
                 decimal amount = Convert.ToDecimal(Console.ReadLine());
                 TransferTransaction transaction = new TransferTransaction(fromAccount, toAccount, amount);
                 bank.ExecuteTransaction(transaction); // Use the bank's execute transaction
-                transaction.Print();
+                if (transaction.Success)
+                {
+                    Console.WriteLine("Transfer successful.");
+                }
+                else
+                {
+                    Console.WriteLine("Transfer failed.");
+                }
             }
             catch (InvalidOperationException ex)
             {
@@ -194,7 +214,7 @@ namespace TheAccountClass
             }
         }
 
-        private static void DoPrint(Bank bank)
+        private static void DoPrint(Bank bank) // Prints the details of all accounts currently in the bank.
         {
             if (bank.Accounts.Count == 0)
             {
@@ -209,7 +229,7 @@ namespace TheAccountClass
             Console.WriteLine("-------------------------\n");
         }
 
-        private static void DoAddAccount(Bank bank)
+        private static void DoAddAccount(Bank bank) // Prompts the user for details and creates a new bank account.
         {
             Console.Write("Enter the name for the new account: ");
             string? accountName = Console.ReadLine();
@@ -237,7 +257,42 @@ namespace TheAccountClass
             Console.WriteLine($"Account '{accountName}' created with balance {initialBalance:C}.");
         }
 
-        private static Account? FindAccount(Bank bank)
+        private static void DoPrintTransactionHistory(Bank bank) // Prints the complete transaction history of the bank.
+        {
+            bank.PrintTransactionHistory();
+        }
+
+        private static void DoRollbackTransaction(Bank bank)
+        {
+            bank.PrintTransactionHistory(); // Show the transactions first
+
+            Console.Write("Enter the number of the transaction to rollback (e.g., 1 for the first transaction): ");
+            try
+            {
+                int transactionNumber = Convert.ToInt32(Console.ReadLine());
+                // Adjust to 0-based index
+                Transaction? transactionToRollback = bank.GetTransaction(transactionNumber - 1);
+
+                if (transactionToRollback == null)
+                {
+                    Console.WriteLine("Error: Invalid transaction number.");
+                    return;
+                }
+
+                bank.RollbackTransaction(transactionToRollback);
+                Console.WriteLine("Transaction rolled back successfully.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                Console.WriteLine($"Error rolling back transaction: {ex.Message}");
+            }
+            catch
+            {
+                Console.WriteLine("Error: Invalid input. Please enter a numeric value for the transaction number.");
+            }
+        }
+
+        private static Account? FindAccount(Bank bank) // Prompts the user for an account name and retrieves the corresponding account from the bank
         {
             Console.Write("Enter account name: ");
             string? accountName = Console.ReadLine();

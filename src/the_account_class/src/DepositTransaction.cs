@@ -2,35 +2,19 @@ using System;
 
 namespace TheAccountClass
 {
-    public class DepositTransaction
+    public class DepositTransaction : Transaction
     {
         private Account _account;
-        private decimal _amount;
-        private bool _executed;
-        private bool _success;
-        private bool _reversed;
 
-        public DepositTransaction(Account account, decimal amount)
+        public DepositTransaction(Account account, decimal amount) : base(amount)
         {
             _account = account;
-            _amount = amount;
-            _executed = false;
-            _success = false;
-            _reversed = false;
         }
 
-        public bool Executed => _executed;   // Has the transaction been attempted?
-        public bool Success => _success;    // Did the deposit succeed?
-        public bool Reversed => _reversed;   // Has the transaction been rolled back?
-
-        public void Print()
+        public override void Print()
         {
-            Console.WriteLine("Deposit Transaction Details:");
+            base.Print(); // Call base Print to show common transaction details
             Console.WriteLine($"Account Name: {_account.Name}");
-            Console.WriteLine($"Amount: {_amount:C}");
-            Console.WriteLine($"Executed: {Executed}");
-            Console.WriteLine($"Success: {Success}");
-            Console.WriteLine($"Reversed: {Reversed}");
 
             // Print human‑readable status
             if (Executed)
@@ -45,7 +29,7 @@ namespace TheAccountClass
                 Console.WriteLine("Status: Transaction successfully reversed.");
         }
 
-        public void Execute()
+        public override void Execute()
         {
             // Prevent executing the same transaction twice
             if (_executed)
@@ -56,6 +40,7 @@ namespace TheAccountClass
                 throw new InvalidOperationException("Deposit amount must be positive.");
 
             _executed = true;
+            _dateStamp = DateTime.Now;
 
             // Attempt the deposit on the account
             if (_account.Deposit(_amount))
@@ -70,7 +55,7 @@ namespace TheAccountClass
             }
         }
 
-        public void Rollback()
+        public override void Rollback()
         {
             // Cannot rollback before execution
             if (!_executed)
@@ -83,6 +68,8 @@ namespace TheAccountClass
             // Only successful transactions can be rolled back
             if (!_success)
                 throw new InvalidOperationException("Cannot rollback a failed transaction.");
+
+            _dateStamp = DateTime.Now; // Update datestamp on rollback
 
             // Reverse the deposit by withdrawing the same amount
             if (_account.Withdraw(_amount))
