@@ -1,0 +1,104 @@
+classDiagram
+    class Account {
+        - decimal _balance
+        - string _name
+        + Account(string name, decimal balance)
+        + bool Deposit(decimal amount)
+        + bool Withdraw(decimal amount)
+        + void Print()
+        + string Name()
+    }
+
+    class Bank {
+        - List~Account~ _accounts
+        - List~Transaction~ _transactions
+        + Bank()
+        + List~Account~ Accounts
+        + void AddAccount(Account account)
+        + Account GetAccount(string name)
+        + void ExecuteTransaction(Transaction transaction)
+        + void RollbackTransaction(Transaction transaction)
+        + void PrintTransactionHistory()
+        + Transaction GetTransaction(int index)
+    }
+
+    class Transaction {
+        - decimal _amount
+        - bool _executed
+        - bool _success
+        - bool _reversed
+        - DateTime _dateStamp
+        + bool Executed
+        + bool Success
+        + bool Reversed
+        + DateTime DateStamp
+        + Transaction(decimal amount)
+        + void Print()
+        + <<abstract>> void Execute()
+        + <<abstract>> void Rollback()
+    }
+
+    class DepositTransaction {
+        - Account _account
+        + DepositTransaction(Account account, decimal amount)
+        + void Execute()
+        + void Rollback()
+        + void Print()
+    }
+
+    class WithdrawTransaction {
+        - Account _account
+        + WithdrawTransaction(Account account, decimal amount)
+        + void Execute()
+        + void Rollback()
+        + void Print()
+    }
+
+    class TransferTransaction {
+        - Account _fromAccount
+        - Account _toAccount
+        - DepositTransaction _deposit
+        - WithdrawTransaction _withdraw
+        + TransferTransaction(Account fromAccount, Account toAccount, decimal amount)
+        + override bool Success
+        + void Execute()
+        + void Rollback()
+        + void Print()
+    }
+
+    class BankSystem {
+        + static void Main(string[] args)
+        + static MenuOption ReadUserOption()
+        + static void DoDeposit(Bank bank)
+        + static void DoWithdraw(Bank bank)
+        + static void DoTransfer(Bank bank)
+        + static void DoPrint(Bank bank)
+        + static void DoAddAccount(Bank bank)
+        + static void DoPrintTransactionHistory(Bank bank)
+        + static void DoRollbackTransaction(Bank bank)
+        + static Account? FindAccount(Bank bank)
+    }
+
+    class MenuOption <<enumeration>> {
+        + Withdraw
+        + Deposit
+        + Print
+        + Transfer
+        + AddAccount
+        + PrintTransactionHistory
+        + RollbackTransaction
+        + Exit
+    }
+
+    Bank *-- Account : manages
+    Bank *-- Transaction : records
+    Transaction <|-- DepositTransaction
+    Transaction <|-- WithdrawTransaction
+    Transaction <|-- TransferTransaction
+    DepositTransaction --> Account : target
+    WithdrawTransaction --> Account : target
+    TransferTransaction --> Account : from
+    TransferTransaction --> Account : to
+    TransferTransaction *-- WithdrawTransaction : withdrawLeg
+    TransferTransaction *-- DepositTransaction : depositLeg
+    BankSystem ..> Bank : uses
