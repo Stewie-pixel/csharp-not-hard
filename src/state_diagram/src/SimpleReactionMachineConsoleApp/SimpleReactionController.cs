@@ -1,54 +1,165 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SimpleReactionMachine
 {
     public class SimpleReactionController : IController
     {
-        public IGui Gui { get; private set; }
-        public IRandom Rng { get; private set; }
+        private IGui gui;
+        private IRandom random;
 
-        private IReactionMachineState _currentState;
+        private IState state;
 
-// Connect the controller with the GUI and the Random Generator
-        public void Connect(IGui gui, IRandom rng)
+        internal int ticks;
+        internal int waitTime;
+
+        public void Connect(IGui gui, IRandom random)
         {
-            Gui = gui;
-            Rng = rng;
+            this.gui = gui;
+            this.random = random;
         }
 
-// Method to change the current state of the controller
-        public void SetState(IReactionMachineState newState)
-        {
-            _currentState = newState;
-        }
-
-// Initialize the controller to set its initial state
         public void Init()
         {
-            SetState(new WaitingForCoinState(this)); // Initial state
-            _currentState.Init();
+            state = new WaitingForCoinState(this);
+            gui.SetDisplay("Insert coin");
         }
 
-// Methods to handle user actions and timer ticks
-        public void CoinInserted()
+        public void CoinInserted() => state.CoinInserted();
+        public void GoStopPressed() => state.GoStopPressed();
+        public void Tick() => state.Tick();
+
+        private interface IState
         {
-            _currentState.CoinInserted();
+            void CoinInserted();
+            void GoStopPressed();
+            void Tick();
         }
 
-// Method to handle the Go/Stop button press
-        public void GoStopPressed()
+        private class WaitingForCoinState : IState
         {
-            _currentState.GoStopPressed();
+            private SimpleReactionController coin;
+
+            public WaitingForCoinState(SimpleReactionController coin)
+            {
+                this.coin = coin;
+            }
+
+            public void CoinInserted()
+            {
+                coin.gui.SetDisplay("Press GO!");
+                coin.state = new WaitingForGoState(coin);
+            }
+
+            public void GoStopPressed() { }
+            public void Tick() { }
         }
 
-// Method to handle timer ticks
-        public void Tick()
+        private class WaitingForGoState : IState
         {
-            _currentState.Tick();
+            private SimpleReactionController coin;
+
+            public WaitingForGoState(SimpleReactionController coin)
+            {
+                this.coin = coin;
+            }
+
+            public void GoStopPressed()
+            {
+                coin.ticks = 0;
+                coin.waitTime = coin.random.GetRandom(100, 251);
+                coin.gui.SetDisplay("Wait...");
+                coin.state = new WaitingForRandomState(coin);
+            }
+
+            public void CoinInserted() { }
+            public void Tick() { }
+        }
+
+        private class WaitingForRandomState : IState
+        {
+            private SimpleReactionController coin;
+
+            public WaitingForRandomState(SimpleReactionController coin)
+            {
+                this.coin = coin;
+            }
+
+            public void Tick()
+            {
+                coin.ticks++;
+                if (coin.ticks >= coin.waitTime)
+                {
+                    coin.ticks = 0;
+                    coin.state = new TimingState(coin);
+                }
+            }
+
+            public void GoStopPressed()
+            {
+                coin.gui.SetDisplay("Insert coin");
+                coin.state = new WaitingForCoinState(coin);
+            }
+
+            public void CoinInserted() { }
+        }
+
+        private class TimingState : IState
+        {
+            private SimpleReactionController coin;
+
+            public TimingState(SimpleReactionController coin)
+            {
+                this.coin = coin;
+            }
+
+            public void Tick()
+            {
+                coin.ticks++;
+                double time = coin.ticks * 0.01;
+                coin.gui.SetDisplay(time.ToString("F2"));
+
+                if (time >= 2.0)
+                {
+                    coin.ticks = 0;
+                    coin.state = new ShowingResultState(coin);
+                }
+            }
+
+            public void GoStopPressed()
+            {
+                coin.ticks = 0;
+                coin.state = new ShowingResultState(coin);
+            }
+
+            public void CoinInserted() { }
+        }
+
+        private class ShowingResultState : IState
+        {
+            private SimpleReactionController coin;
+
+            public ShowingResultState(SimpleReactionController coin)
+            {
+                this.coin = coin;
+            }
+
+            public void Tick()
+            {
+                coin.ticks++;
+                if (coin.ticks >= 300)
+                {
+                    coin.gui.SetDisplay("Insert coin");
+                    coin.state = new WaitingForCoinState(coin);
+                }
+            }
+
+            public void GoStopPressed()
+            {
+                coin.gui.SetDisplay("Insert coin");
+                coin.state = new WaitingForCoinState(coin);
+            }
+
+            public void CoinInserted() { }
         }
     }
 }
