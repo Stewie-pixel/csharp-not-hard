@@ -34,7 +34,9 @@ namespace SimpleReactionMachine
             void GoStopPressed();
             void Tick();
         }
-
+/// <summary>
+/// Represents the state where the machine is waiting for a coin to be inserted.
+/// </summary>
         private class WaitingForCoinState : IState
         {
             private SimpleReactionController coin;
@@ -46,14 +48,16 @@ namespace SimpleReactionMachine
 
             public void CoinInserted()
             {
-                coin.gui.SetDisplay("Press GO!");
+                coin.gui.SetDisplay("Lets GO!");
                 coin.state = new WaitingForGoState(coin);
             }
 
             public void GoStopPressed() { }
             public void Tick() { }
         }
-
+/// <summary>
+/// Represents the state where the machine is waiting for the player to press the Go/Stop button after a coin has been inserted.
+/// </summary>
         private class WaitingForGoState : IState
         {
             private SimpleReactionController coin;
@@ -74,7 +78,9 @@ namespace SimpleReactionMachine
             public void CoinInserted() { }
             public void Tick() { }
         }
-
+/// <summary>
+/// Represents the state where the machine is waiting for a random amount of time before allowing the player to press the Go/Stop button again.
+/// </summary>
         private class WaitingForRandomState : IState
         {
             private SimpleReactionController coin;
@@ -102,7 +108,9 @@ namespace SimpleReactionMachine
 
             public void CoinInserted() { }
         }
-
+/// <summary>
+/// Represents the state where the machine is timing how long it takes for the player to press the Go/Stop button after the random wait time has elapsed.
+/// </summary>
         private class TimingState : IState
         {
             private SimpleReactionController coin;
@@ -133,7 +141,9 @@ namespace SimpleReactionMachine
 
             public void CoinInserted() { }
         }
-
+/// <summary>
+/// Represents the state where the machine is showing the player's reaction time result after they have pressed the Go/Stop button or after 2 seconds have elapsed in the TimingState.
+/// </summary>
         private class ShowingResultState : IState
         {
             private SimpleReactionController coin;
