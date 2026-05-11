@@ -1,0 +1,17 @@
+stateDiagram-v2
+    [*] --> WaitingForCoinState : Init()
+
+    WaitingForCoinState --> WaitingForGoState : CoinInserted
+
+    WaitingForGoState --> WaitingForRandomState : GoStopPressed
+    WaitingForGoState --> WaitingForCoinState : Tick (10s Timeout)
+
+    WaitingForRandomState --> TimingState : Tick (Wait Time Elapsed)
+    WaitingForRandomState --> WaitingForCoinState : GoStopPressed (False Start)
+
+    TimingState --> ShowingResultState : GoStopPressed / Tick (2s Limit)
+
+    ShowingResultState --> WaitingForRandomState : Next Round (Games < 3)
+    ShowingResultState --> ShowingAverageState : Finish Session (Games >= 3)
+
+    ShowingAverageState --> WaitingForCoinState : GoStopPressed / Tick (5s Timeout)
