@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/EnhancedSimpleReactionMachine/">
+    <Project Path="EnhancedSimpleReactionMachine/EnhancedSimpleReactionMachine/EnhancedSimpleReactionMachine.csproj" />
+  </Folder>
+  <Project Path="EnhancedSimpleReactionMachine Tester/EnhancedSimpleReactionMachine Tester.csproj" />
+</Solution>
