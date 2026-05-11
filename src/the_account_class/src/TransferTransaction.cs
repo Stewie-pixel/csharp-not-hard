@@ -60,13 +60,8 @@ namespace TheAccountClass
 
         public override void Execute()
         {
-            if (_executed)
-            {
-                throw new InvalidOperationException("Transfer transaction has already been attempted.");
-            }
-
-            _executed = true;
-            _dateStamp = DateTime.Now;
+            base.Execute(); // sets _executed, _dateStamp; guards double-execution
+            // Note: base does NOT set _success — Transfer overrides Success entirely
 
             try
             {
@@ -75,17 +70,12 @@ namespace TheAccountClass
             }
             catch (InvalidOperationException ex)
             {
-                // If either withdraw or deposit fails, the transfer fails.
-                // Re-throw the exception after attempting to rollback the withdraw if it succeeded partially.
                 if (_withdraw.Success)
                 {
-                    try
-                    {
-                        _withdraw.Rollback();
-                    }
+                    try { _withdraw.Rollback(); }
                     catch (InvalidOperationException rollbackEx)
                     {
-                        Console.WriteLine($"Warning: Failed to rollback partial withdrawal during transfer failure: {rollbackEx.Message}");
+                        Console.WriteLine($"Warning: Failed to rollback partial withdrawal: {rollbackEx.Message}");
                     }
                 }
                 throw new InvalidOperationException($"Transfer failed: {ex.Message}", ex);
@@ -94,20 +84,7 @@ namespace TheAccountClass
 
         public override void Rollback()
         {
-            if (!_executed)
-            {
-                throw new InvalidOperationException("Transfer transaction has not been executed yet.");
-            }
-            if (_reversed)
-            {
-                throw new InvalidOperationException("Transfer transaction has already been reversed.");
-            }
-            if (!Success)
-            {
-                throw new InvalidOperationException("Cannot rollback a failed transfer transaction.");
-            }
-
-            _dateStamp = DateTime.Now; // Update datestamp on rollback
+            base.Rollback(); // guards not-executed, double-rollback, !Success; sets _dateStamp
 
             try
             {
