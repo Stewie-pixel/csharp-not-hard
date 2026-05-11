@@ -31,18 +31,11 @@ namespace TheAccountClass
 
         public override void Execute()
         {
-            // Prevent executing the same transaction twice
-            if (_executed)
-                throw new InvalidOperationException("Transaction has already been attempted.");
-
-            // Validate deposit amount
             if (_amount <= 0)
                 throw new InvalidOperationException("Deposit amount must be positive.");
 
-            _executed = true;
-            _dateStamp = DateTime.Now;
+            base.Execute(); // sets _executed, _dateStamp; guards double-execution
 
-            // Attempt the deposit on the account
             if (_account.Deposit(_amount))
             {
                 _success = true;
@@ -50,28 +43,14 @@ namespace TheAccountClass
             else
             {
                 _success = false;
-                // Deposit should normally never fail if amount > 0
                 throw new InvalidOperationException("Deposit failed for an unknown reason.");
             }
         }
 
         public override void Rollback()
         {
-            // Cannot rollback before execution
-            if (!_executed)
-                throw new InvalidOperationException("Transaction has not been executed yet.");
+            base.Rollback(); // guards not-executed, double-rollback, failed; sets _dateStamp
 
-            // Cannot rollback twice
-            if (_reversed)
-                throw new InvalidOperationException("Transaction has already been reversed.");
-
-            // Only successful transactions can be rolled back
-            if (!_success)
-                throw new InvalidOperationException("Cannot rollback a failed transaction.");
-
-            _dateStamp = DateTime.Now; // Update datestamp on rollback
-
-            // Reverse the deposit by withdrawing the same amount
             if (_account.Withdraw(_amount))
             {
                 _reversed = true;

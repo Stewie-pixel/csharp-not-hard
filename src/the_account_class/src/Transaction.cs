@@ -35,8 +35,27 @@ namespace TheAccountClass
             Console.WriteLine($"Date: {DateStamp}");
         }
 
-        public abstract void Execute(); // Abstract method to execute the transaction
-        public abstract void Rollback(); // Abstract method to rollback the transaction
+        // Subclasses call base.Execute() first, then do their own work.
+        public virtual void Execute()
+        {
+            if (_executed)
+                throw new InvalidOperationException("Transaction has already been attempted.");
 
+            _executed = true;
+            _dateStamp = DateTime.Now;
+        }
+
+        // Subclasses call base.Rollback() first, then do their own work.
+        public virtual void Rollback()
+        {
+            if (!_executed)
+                throw new InvalidOperationException("Transaction has not been executed yet.");
+            if (_reversed)
+                throw new InvalidOperationException("Transaction has already been reversed.");
+            if (!_success)
+                throw new InvalidOperationException("Cannot rollback a failed transaction.");
+
+            _dateStamp = DateTime.Now;
+        }
     }
 }
