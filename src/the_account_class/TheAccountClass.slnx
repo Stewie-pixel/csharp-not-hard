@@ -1,6 +1,0 @@
-<Solution>
-  <Folder Name="/test/">
-    <Project Path="test/Account.Tests.csproj" />
-  </Folder>
-  <Project Path="TheAccountClass.csproj" />
-</Solution>
